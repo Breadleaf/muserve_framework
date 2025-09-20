@@ -154,7 +154,7 @@ $.$create = function (elementType, props = {}, attachToElement = this._root) {
 
 	if (props.id) newElement.id = props.id;
 	if (props.className) newElement.className = props.className;
-	if (props.children) $._setup(newElement).$addChildren(children);
+	if (props.children) $._setup(newElement).$addChildren(props.children);
 	if (props.onClick) $._setup(newElement).$on("click", props.onClick);
 
 	return this._setup(newElement);
