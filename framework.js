@@ -150,12 +150,39 @@ $.$create = function (elementType, props = {}, attachToElement = this._root) {
 
 	const newElement = document.createElement(elementType);
 
-	if (attachToElement) attachToElement.appendChild(newElement);
+	for (const key in props) {
+		if (props.hasOwnProperty(key)) {
+			const value = props[key];
+			switch (key) {
+				case "children":
+					this._setup(newElement).$addChildren(value);
+					break;
+				case "onClick":
+				case "onInput":
+				case "onChange":
+					this._setup(newElement).$on(key.substring(2).toLowerCase(), value);
+					break;
+				case "style":
+					this._setup(newElement).$style(value);
+					break;
+				case "className":
+					newElement.className = value;
+					break;
+				case "textContent":
+					newElement.textContent = value;
+					break;
+				default:
+					if (typeof value === 'boolean') {
+						newElement[key] = value;
+					} else {
+						newElement.setAttribute(key, value);
+					}
+				break;
+			}
+		}
+	}
 
-	if (props.id) newElement.id = props.id;
-	if (props.className) newElement.className = props.className;
-	if (props.children) $._setup(newElement).$addChildren(props.children);
-	if (props.onClick) $._setup(newElement).$on("click", props.onClick);
+	if (attachToElement) attachToElement.appendChild(newElement);
 
 	return this._setup(newElement);
 }
