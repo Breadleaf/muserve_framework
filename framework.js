@@ -3,6 +3,11 @@ const $ = () => {
 }
 
 $._setup = function (element) {
+	if (!element || !(element instanceof HTMLElement)) {
+		console.warn("[framework] _setup(): provided element is not an HTMLElement or is null");
+		return null;
+	}
+
 	// attach element's prototype object's properties to element as function
 	// NOTE: each property is name -> `$${name}`
 	let prototype = Object.getPrototypeOf(element);
@@ -24,7 +29,7 @@ $._setup = function (element) {
 	// give element the $addChildren function if it has appendChild property
 	if ("appendChild" in element) {
 		element["$addChildren"] = function (children) {
-			if (typeof children === typeof []) {
+			if (Array.isArray(children)) {
 				children.forEach((child) => {
 					element.appendChild(child);
 				});
@@ -86,45 +91,55 @@ $._setup = function (element) {
 	return element;
 }
 
-$.$byId = function (id) {
-	return this._setup(document.getElementById(id));
+$.$byId = function (id, target = document) {
+	if (!(target instanceof HTMLElement || target instanceof Document || target instanceof ShadowRoot)) {
+		throw new Error("[framework] $byId(): The target must be an HTMLElement, Document, or ShadowRoot.");
+	}
+	return this._setup(target.getElementById(id));
 }
 
-$.$byName = function (name) {
-	return document.getElementsByName(name).values().map(
-		(element) => this._setup(element)
-	).toArray();
+$.$byName = function (name, target = document) {
+	if (!(target instanceof HTMLElement || target instanceof Document || target instanceof ShadowRoot)) {
+		throw new Error("[framework] $byName(): The target must be an HTMLElement, Document, or ShadowRoot.");
+	}
+	return Array.from(target.getElementsByName(name)).map(element => this._setup(element));
 }
 
-$.$byTag = function (tag) {
-	return document.getElementsByTagName(tag).values().map(
-		(element) => this._setup(element)
-	).toArray();
+$.$byTag = function (name, target = document) {
+	if (!(target instanceof HTMLElement || target instanceof Document || target instanceof ShadowRoot)) {
+		throw new Error("[framework] $byTag(): The target must be an HTMLElement, Document, or ShadowRoot.");
+	}
+	return Array.from(target.getElementsByTagName(name)).map(element => this._setup(element));
 }
 
-$.$byClass = function (tag) {
-	return document.getElementsByClassName(tag).values().map(
-		(element) => this._setup(element)
-	).toArray();
+$.$byClass = function (name, target = document) {
+	if (!(target instanceof HTMLElement || target instanceof Document || target instanceof ShadowRoot)) {
+		throw new Error("[framework] $byClass(): The target must be an HTMLElement, Document, or ShadowRoot.");
+	}
+	return Array.from(target.getElementsByClassName(name)).map(element => this._setup(element));
 }
 
-$.$select = function (selector) {
-	return this._setup(document.querySelector(selector));
+$.$select = function (selector, target = document) {
+	if (!(target instanceof HTMLElement || target instanceof Document || target instanceof ShadowRoot)) {
+		throw new Error("[framework] $select(): The target must be an HTMLElement, Document, or ShadowRoot.");
+	}
+	return this._setup(target.querySelector(selector));
 }
 
-$.$selectAll = function (selector) {
-	return document.querySelectorAll(selector).values().map(
-		(element) => this._setup(element)
-	).toArray();
+$.$selectAll = function (selector, target = document) {
+	if (!(target instanceof HTMLElement || target instanceof Document || target instanceof ShadowRoot)) {
+		throw new Error("[framework] $selectAll(): The target must be an HTMLElement, Document, or ShadowRoot.");
+	}
+	return Array.from(target.querySelectorAll(selector)).map(element => this._setup(element));
 }
 
 $._root = "uninitialized";
 
 $.$registerRoot = function (element) {
-	if (element instanceof HTMLElement) {
+	if (element instanceof HTMLElement || element instanceof ShadowRoot) {
 		this._root = element;
 	} else {
-		throw new Error("[framework] $registerRoot(): root container can only be registered to an HTMLElement");
+		throw new Error("[framework] $registerRoot(): root container can only be registered to an HTMLElement or ShadowRoot");
 	}
 }
 
